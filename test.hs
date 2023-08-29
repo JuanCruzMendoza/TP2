@@ -67,5 +67,49 @@ digitosUnidades n | n<0 = error "negativos"
 
 digitosDecenas :: Int -> Int
 digitosDecenas n | n<0 = error "negativos"
- | otherwise = mod n 100
- 
+ | otherwise = mod (div n 10) 10
+
+estanRelacionados :: Int -> Int -> Bool
+estanRelacionados x y | x==0 || y==0 = error "Distinto de cero"
+                      | mod x y == 0 = True
+                      | otherwise = False
+
+
+prodInt :: (Float, Float) -> (Float, Float) -> Float
+prodInt x y = fst x * fst y + snd x * snd y
+
+todoMenor :: (Float, Float) -> (Float, Float) -> Bool
+todoMenor x y = fst x < fst y && snd x < snd y
+
+distanciaPuntos  :: (Float, Float) -> (Float, Float) -> Float
+distanciaPuntos x y = sqrt ((fst x - fst y)**2 + (snd x - snd y)**2)
+
+sumaTerna :: (Int, Int, Int)-> Int
+sumaTerna (x,y,z) = x+y+z
+
+multiplosSuma :: Int -> Int -> Int
+multiplosSuma x y | x<0 && y<0 = error "negativos"
+ | mod x y == 0 = x
+ | otherwise = 0
+
+sumarSoloMultiplos :: (Int, Int, Int) -> Int -> Int
+sumarSoloMultiplos (x,y,z) w | w <0 = error "Negativo"
+                             | otherwise = multiplosSuma x w + multiplosSuma y w + multiplosSuma z w
+
+posPrimerPar :: (Int, Int, Int) -> Int
+posPrimerPar (x,y,z) | mod x 2 == 0 = 0
+                     | mod y 2 == 0 = 1
+                     | mod z 2 == 0 = 2
+                     | otherwise = 4
+                
+crearPar :: a -> b -> (a,b)
+crearPar a b = (a,b)
+
+invertir :: (a,b) -> (b,a)
+invertir (a,b) = (b,a)
+
+bisiesto :: Int -> Bool
+bisiesto x = (not (mod x 100 == 0) || mod x 400 == 0) && mod x 4 == 0 
+
+sumarLista a | a == [] = 0
+             | otherwise = head a + sumarLista (tail a)
