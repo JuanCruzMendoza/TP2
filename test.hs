@@ -6,14 +6,14 @@ maximoabsoluto :: Int -> Int -> Int
 maximoabsoluto x y | absoluto x >= absoluto y = x
     | absoluto y > absoluto x = y
 
-g n | n==1 = 130
+g1 n | n==1 = 130
     | n==2 = 120
 
-f n | n==130 = 30
+f1 n | n==130 = 30
     | n==120 = 20
 
 h :: Int -> Int
-h n = f (g n)
+h n = f1 (g1 n)
 
 maximo3 :: (Int, Int, Int) -> Int
 maximo3 (x,y,z) | x > y && x>z = x
@@ -113,3 +113,25 @@ bisiesto x = (not (mod x 100 == 0) || mod x 400 == 0) && mod x 4 == 0
 
 sumarLista a | a == [] = 0
              | otherwise = head a + sumarLista (tail a)
+
+todosMenores :: (Int, Int, Int) ->Bool
+todosMenores (x,y,z) = f(x)>g(x) && f(y)>g(y) && f(z)>g(z)
+
+g :: Int -> Int
+g n | mod n 2 == 0 = div n 2
+    | otherwise = 3*n+1
+
+f :: Int->Int
+f n | n<=7 = n*n
+    | otherwise = 2*n-1
+
+distanciaManhattan:: (Float, Float, Float) -> (Float, Float, Float) -> Float
+distanciaManhattan (x,y,z) (h,i,j) = abs (x-h+y-i+z-j)
+
+sumaUltimosDosDigitos :: Int -> Int
+sumaUltimosDosDigitos n = digitosDecenas n + digitosUnidades n
+
+comparar :: Int -> Int -> Int
+comparar x y | sumaUltimosDosDigitos x < sumaUltimosDosDigitos y = 1
+             | sumaUltimosDosDigitos x > sumaUltimosDosDigitos y = -1
+             | sumaUltimosDosDigitos x == sumaUltimosDosDigitos y = 0
