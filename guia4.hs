@@ -20,3 +20,14 @@ esDivisible x y | x > 0 = esDivisible (x-y) y
 sumaImpares :: Int -> Int
 sumaImpares 1 = 1
 sumaImpares n = 2*n-1 + sumaImpares (n-1)
+
+-- Ejercicio 5
+medioFact :: Int -> Int
+medioFact n | n == 0  || n == 1 = 1
+            | otherwise = n * medioFact (n-2)
+
+-- Ejercicio 6
+sumaDigitos :: Int -> Int
+sumaDigitos n | rest == 0 = n
+              | otherwise = rest + sumaDigitos (div n 10)
+              where rest = mod n 10
