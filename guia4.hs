@@ -124,3 +124,7 @@ sumaRacionales :: Int -> Int -> Float
 sumaRacionales 1 m = sumaRacionales_interna 1 m
 sumaRacionales n m = sumaRacionales_interna n m + sumaRacionales (n-1) m
 
+-- Ejercicio 16
+sumaRacionales :: Int -> Int -> Float
+sumaRacionales 1 m = sumaRacionales_interna 1 m
+sumaRacionales n m = sumaRacionales_interna n m + sumaRacionales (n-1) m
