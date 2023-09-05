@@ -36,21 +36,27 @@ todosDigitosIguales :: Int -> Bool
 todosDigitosIguales n | n < 10 = True
                       | otherwise = mod n 10 == mod (div n 10) 10 && todosDigitosIguales (div n 10)
 
--- Ejercicio 8
-cantDigitos :: Int -> Int
-cantDigitos n | n < 10 = 1
-              | otherwise = 1 + cantDigitos (div n 10)
-
+-- Ejercico 8 
 iesimoDigito :: Int -> Int -> Int
-iesimoDigito n i = mod (div n (10^(cantDigitos n-i))) 10
+iesimoDigito n i = mod (div n (10^(cantDigitos n - i))) 10
 
--- Ejercicio 9
-ultimoNum :: Int -> Int
-ultimoNum n | n < 10 = n
-            | otherwise = ultimoNum (div n 10)
+cantDigitos :: Int -> Int
+cantDigitos x | x == 0 = 0
+              | otherwise = 1 + cantDigitos (div x 10)
+--Ejercicio 9
+primerDigito :: Int -> Int -> Int
+primerDigito n q = iesimoDigito n (cantDigitos n - q)
+
+ultimoDigito :: Int -> Int -> Int
+ultimoDigito n q = iesimoDigito n (q+1)
+
+esCapicua_aux :: Int -> Int -> Bool
+esCapicua_aux n q | q == div (cantDigitos n) 2 || q == (div (cantDigitos n) 2) +1  = True
+              | primerDigito n q == ultimoDigito n q = esCapicua_aux n (q+1)
+              | otherwise = False
 
 esCapicua :: Int -> Bool
-esCapicua n = mod n 10 == ultimoNum n
+esCapicua n = esCapicua_aux n 1
 
 -- Ejercicio 10
 f1 :: Int -> Int
@@ -103,28 +109,6 @@ sumaPotencias_b q a m = q^(a+m) + sumaPotencias_b q a (m-1)
 sumaPotencias :: Int -> Int -> Int -> Int
 sumaPotencias q 0 m = sumaPotencias_b q 0 m
 sumaPotencias q n m = sumaPotencias_b q n m + sumaPotencias q (n-1) m 
-
--- Ejercico 8 
-iesimoDigito :: Int -> Int -> Int
-iesimoDigito n i = mod (div n (10^(cantDigitos n - i))) 10
-
-cantDigitos :: Int -> Int
-cantDigitos x | x == 0 = 0
-              | otherwise = 1 + cantDigitos (div x 10)
---Ejercicio 9
-primerDigito :: Int -> Int -> Int
-primerDigito n q = iesimoDigito n (cantDigitos n - q)
-
-ultimoDigito :: Int -> Int -> Int
-ultimoDigito n q = iesimoDigito n (q+1)
-
-esCapicua_aux :: Int -> Int -> Bool
-esCapicua_aux n q | q == div (cantDigitos n) 2 || q == (div (cantDigitos n) 2) +1  = True
-              | primerDigito n q == ultimoDigito n q = esCapicua_aux n (q+1)
-              | otherwise = False
-
-esCapicua :: Int -> Bool
-esCapicua n = esCapicua_aux n 1
 
 -- Ejercicio 15
 sumaRacionales_interna :: Int -> Int -> Float
