@@ -1,4 +1,6 @@
 -- Ejercicio 1
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Use camelCase" #-}
 fibonacci :: Int -> Int
 fibonacci 0 = 0
 fibonacci 1 = 1
@@ -94,7 +96,7 @@ raizDe2Aprox n = sucesion n - 1
 
 -- Ejercicio 13
 suma_1 :: Int -> Int -> Int
-suma_1 _ 0 = 0 
+suma_1 _ 0 = 0
 suma_1 n j = n^j + suma_1 n (j-1)
 
 suma_2 :: Int -> Int -> Int
@@ -108,15 +110,71 @@ sumaPotencias_b q a m = q^(a+m) + sumaPotencias_b q a (m-1)
 
 sumaPotencias :: Int -> Int -> Int -> Int
 sumaPotencias q 0 m = sumaPotencias_b q 0 m
-sumaPotencias q n m = sumaPotencias_b q n m + sumaPotencias q (n-1) m 
+sumaPotencias q n m = sumaPotencias_b q n m + sumaPotencias q (n-1) m
 
 -- Ejercicio 15
 sumaRacionales_interna :: Int -> Int -> Float
 sumaRacionales_interna p 1 = fromIntegral p
-sumaRacionales_interna p q = (fromIntegral p) / (fromIntegral q) + sumaRacionales_interna p (q-1)
+sumaRacionales_interna p q = fromIntegral p / fromIntegral q + sumaRacionales_interna p (q-1)
 
 sumaRacionales :: Int -> Int -> Float
 sumaRacionales 1 m = sumaRacionales_interna 1 m
 sumaRacionales n m = sumaRacionales_interna n m + sumaRacionales (n-1) m
 
 -- Ejercicio 16
+menorDivisor_aux :: Int -> Int -> Int
+menorDivisor_aux n d | mod n d == 0 = d
+                     | otherwise = menorDivisor_aux n (d+1)
+
+menorDivisor :: Int -> Int
+menorDivisor n = menorDivisor_aux n 2
+
+esPrimo :: Int -> Bool
+esPrimo n = menorDivisor n == n
+
+sonCoprimos :: Int -> Int -> Bool
+sonCoprimos x y | x==1 = True
+                | mod y (menorDivisor x) == 0 = False
+                | otherwise = sonCoprimos (div x (menorDivisor x)) y
+
+nEsimoPrimo_aux :: Int -> Int -> Int
+nEsimoPrimo_aux n i | n == 0 = i-1
+                    | esPrimo i = nEsimoPrimo_aux (n-1) (i+1)
+                    | otherwise = nEsimoPrimo_aux n (i+1)
+
+nEsimoPrimo :: Int -> Int
+nEsimoPrimo n = nEsimoPrimo_aux n 2
+
+-- Ejercicio 17
+esFibonacci_aux :: Int -> Int -> Bool
+esFibonacci_aux n i | n == fibonacci i = True
+                    | n > fibonacci i = esFibonacci_aux n (i+1)
+                    | otherwise = False
+
+esFibonacci :: Int -> Bool
+esFibonacci n = esFibonacci_aux n 0
+
+-- Ejercicio 18
+mayorDigitoPar_aux :: Int -> Int -> Int
+mayorDigitoPar_aux n i | n == 0 = i
+                       | even ultDigito && i < ultDigito = mayorDigitoPar_aux (div n 10) ultDigito
+                       | otherwise = mayorDigitoPar_aux (div n 10) i
+                        where ultDigito = mod n 10
+
+mayorDigitoPar :: Int -> Int
+mayorDigitoPar n = mayorDigitoPar_aux n (-1)
+
+-- Ejercicio 19
+sumaPrimos :: Int -> Int
+sumaPrimos 0 = 0
+sumaPrimos n = nEsimoPrimo n + sumaPrimos (n-1)  
+
+esSumaInicialDePrimos_aux :: Int -> Int -> Bool
+esSumaInicialDePrimos_aux n i | n > sumaPrimos i = esSumaInicialDePrimos_aux n (i + 1)
+                         | n == sumaPrimos i = True
+                         | otherwise = False
+
+esSumaInicialDePrimos :: Int -> Bool
+esSumaInicialDePrimos n = esSumaInicialDePrimos_aux n 0
+
+-- Ejercicio 20
