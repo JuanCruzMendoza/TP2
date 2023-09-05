@@ -27,11 +27,6 @@ medioFact n | n == 0  || n == 1 = 1
             | otherwise = n * medioFact (n-2)
 
 -- Ejercicio 6
-sumaDigitos :: Int -> Int
-sumaDigitos n | rest == 0 = n
-              | otherwise = rest + sumaDigitos (div n 10)
-              where rest = mod n 10
-
 sumaDigitos :: Int ->Int
 sumaDigitos 0 = 0
 sumaDigitos n = mod n 10 + sumaDigitos (div n 10)
