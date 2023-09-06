@@ -178,3 +178,25 @@ esSumaInicialDePrimos :: Int -> Bool
 esSumaInicialDePrimos n = esSumaInicialDePrimos_aux n 0
 
 -- Ejercicio 20
+sumaDivisores :: Int -> Int
+sumaDivisores 1 = 1
+sumaDivisores n = menorDivisor n + sumaDivisores (div n (menorDivisor n))
+
+tomaValorMax_aux :: Int -> Int -> Int -> Int
+tomaValorMax_aux n1 n2 i | n2+1 == n1 = i
+                         | sumaDivisores n1 > sumaDivisores i = tomaValorMax_aux (n1 +1) n2 n1
+                         | otherwise = tomaValorMax_aux (n1 + 1) n2 i
+
+tomarValorMax :: Int -> Int -> Int
+tomarValorMax n1 n2 = tomaValorMax_aux n1 n2 n1
+
+-- Ejercicio 21
+pitagoras_aux :: Int -> Int -> Int -> Int
+pitagoras_aux m n r | m == 0 && n<= r = 1
+                    | m == 0 = 0
+                    | m^2 + n^2 <= r^2 = 1 + pitagoras_aux (m-1) n r
+                    | otherwise = pitagoras_aux (m-1) n r
+
+pitagoras :: Int -> Int -> Int -> Int
+pitagoras m n r | n == 0 = pitagoras_aux m 0 r
+                | otherwise = pitagoras_aux m n r + pitagoras m (n-1) r
