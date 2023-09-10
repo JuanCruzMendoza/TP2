@@ -1,4 +1,7 @@
 -- Ejercicio 1
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Use even" #-}
+{-# HLINT ignore "Use list literal pattern" #-}
 longitud :: [t] -> Int
 longitud [] = 0
 longitud (x:xs) = 1 + longitud xs
@@ -63,3 +66,47 @@ capicua :: (Eq t) => [t] -> Bool
 capicua seq | longitud seq == 1 || longitud seq == 0 = True 
                | head seq == ultimo (tail seq) = capicua (principio (tail seq))
                | otherwise = False
+
+-- Ejercicio 3
+sumatoria :: [Int] -> Int
+sumatoria [] = 0
+sumatoria (x:xs) = x + sumatoria xs
+
+productoria :: [Int] -> Int
+productoria [] = 1
+productoria (x:xs) = x * productoria xs
+
+maximo :: [Int] -> Int
+maximo (x:[]) = x
+maximo (x:xs) | x > head xs = maximo (x:tail xs)
+              | otherwise = maximo xs
+
+sumarN :: Int -> [Int] -> [Int]
+sumarN _ [] = []
+sumarN n (x:xs) = (n+x):sumarN n xs
+
+sumarElPrimero :: [Int] -> [Int]
+sumarElPrimero xs = sumarN (head xs) xs
+
+sumarElUltimo :: [Int] -> [Int]
+sumarElUltimo xs = sumarN (ultimo xs) xs
+
+pares :: [Int] -> [Int]
+pares [] = []
+pares (x:xs) | mod x 2 == 0 = x : pares xs
+             | otherwise = pares xs
+
+multiplosDeN :: Int -> [Int] -> [Int]
+multiplosDeN _ [] = []
+multiplosDeN n (x:xs) | mod x n == 0 = x: multiplosDeN n xs
+                      | otherwise = multiplosDeN n xs
+
+ordenar :: [Int] -> [Int]
+ordenar [] = []
+ordenar xs =  ordenar (quitar (maximo xs) xs) ++ [maximo xs]
+
+-- Ejercicio 4
+sacarBlancosRepetidos :: [Char] -> [Char]
+sacarBlancosRepetidos (x:[]) = []
+sacarBlancosRepetidos (x:xs) | x == ' ' && head xs == ' ' = sacarBlancosRepetidos xs 
+                             | otherwise = x:sacarBlancosRepetidos xs 
