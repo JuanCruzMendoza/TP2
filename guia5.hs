@@ -105,6 +105,22 @@ ordenar :: [Int] -> [Int]
 ordenar [] = []
 ordenar xs =  ordenar (quitar (maximo xs) xs) ++ [maximo xs]
 
+
+quicksort :: [Int] -> [Int]
+quicksort [] = []
+quicksort (x:xs) = menores x xs ++ [x] ++ mayores x xs
+
+mayores :: Int -> [Int] -> [Int]
+mayores _ [] = []
+mayores n (x:xs) | n < x = x:mayores n xs
+                 | otherwise = mayores n xs
+
+menores :: Int -> [Int] -> [Int]
+menores _ [] = []
+menores n (x:xs) | n > x = x:menores n xs
+                 | otherwise = menores n xs           
+
+
 -- Ejercicio 4
 sacarBlancosRepetidos :: [Char] -> [Char]
 sacarBlancosRepetidos (x:[]) = []
