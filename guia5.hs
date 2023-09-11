@@ -123,6 +123,44 @@ menores n (x:xs) | n > x = x:menores n xs
 
 -- Ejercicio 4
 sacarBlancosRepetidos :: [Char] -> [Char]
+sacarBlancosRepetidos [] = []
 sacarBlancosRepetidos (x:[]) = []
 sacarBlancosRepetidos (x:xs) | x == ' ' && head xs == ' ' = sacarBlancosRepetidos xs 
                              | otherwise = x:sacarBlancosRepetidos xs 
+
+contarPalabras :: [Char] -> Int
+contarPalabras [] = 1 
+contarPalabras (x:xs) | x == ' ' = 1 + contarPalabras xs
+                      | otherwise = contarPalabras xs
+
+palabras_aux :: [Char] -> [Char] -> [[Char]]
+palabras_aux [] l = [l]
+palabras_aux (x:xs) l | x == ' ' = [l] ++ palabras_aux xs []
+                  | otherwise = palabras_aux xs (x:l)
+
+palabras :: [Char] -> [[Char]]
+palabras xs = palabras_aux xs []
+
+palabraMasLarga_aux :: [[Char]] -> [Char] -> [Char]
+palabraMasLarga_aux [] x = x
+palabraMasLarga_aux (x:xs) l | contarPalabras x > contarPalabras l = palabraMasLarga_aux xs x
+                         | otherwise = palabraMasLarga_aux xs l
+
+palabraMasLarga :: [Char] -> [Char]
+palabraMasLarga xs = palabraMasLarga_aux (palabras xs) []
+
+aplanar :: [[Char]] -> [Char]
+aplanar [] = []
+aplanar (x:xs) = x ++ [' '] ++ aplanar xs
+
+aplanarConBlancos :: [[Char]] -> [Char]
+aplanarConBlancos [] = []
+aplanarConBlancos (x:xs) = x ++ [' '] ++ aplanarConBlancos xs
+
+agregarNBlancos :: Int -> [Char]
+agregarNBlancos 0 = []
+agregarNBlancos n = ' ':agregarNBlancos (n-1)
+
+aplanarConNBlancos :: [[Char]] -> Int -> [Char]
+aplanarConNBlancos [x] _ = x
+aplanarConNBlancos (x:xs) n = x ++ agregarNBlancos n ++ aplanarConNBlancos xs n
