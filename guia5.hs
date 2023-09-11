@@ -136,15 +136,15 @@ contarPalabras (x:xs) | x == ' ' = 1 + contarPalabras xs
 palabras_aux :: [Char] -> [Char] -> [[Char]]
 palabras_aux [] l = [l]
 palabras_aux (x:xs) l | x == ' ' = [l] ++ palabras_aux xs []
-                  | otherwise = palabras_aux xs (x:l)
+                  | otherwise = palabras_aux xs (l++[x])
 
 palabras :: [Char] -> [[Char]]
 palabras xs = palabras_aux xs []
 
 palabraMasLarga_aux :: [[Char]] -> [Char] -> [Char]
-palabraMasLarga_aux [] x = x
-palabraMasLarga_aux (x:xs) l | contarPalabras x > contarPalabras l = palabraMasLarga_aux xs x
-                         | otherwise = palabraMasLarga_aux xs l
+palabraMasLarga_aux [] l = l
+palabraMasLarga_aux (x:xs) l | longitud x > longitud l = palabraMasLarga_aux xs x
+                             | otherwise = palabraMasLarga_aux xs l
 
 palabraMasLarga :: [Char] -> [Char]
 palabraMasLarga xs = palabraMasLarga_aux (palabras xs) []
@@ -164,3 +164,25 @@ agregarNBlancos n = ' ':agregarNBlancos (n-1)
 aplanarConNBlancos :: [[Char]] -> Int -> [Char]
 aplanarConNBlancos [x] _ = x
 aplanarConNBlancos (x:xs) n = x ++ agregarNBlancos n ++ aplanarConNBlancos xs n
+
+
+-- Ejercicio 5
+sumaAcumulada_aux :: (Num t) => [t] -> t -> [t]
+sumaAcumulada_aux [] _ = []
+sumaAcumulada_aux (x:xs) l = [x+l] ++ sumaAcumulada_aux xs (x+l) 
+
+sumaAcumulada :: (Num t) => [t] -> [t]
+sumaAcumulada xs = sumaAcumulada_aux xs 0
+
+
+primos_aux :: Int -> Int -> [Int]
+primos_aux 1 _ = []
+primos_aux n i | mod n i == 0 = [i] ++ primos_aux (div n i) 2
+           | otherwise = primos_aux n (i+1)
+
+primos :: Int -> [Int]
+primos n = primos_aux n 2
+
+descomponerEnPrimos :: [Int] -> [[Int]]
+descomponerEnPrimos [] = []
+descomponerEnPrimos (x:xs) = [primos x] ++ descomponerEnPrimos xs
