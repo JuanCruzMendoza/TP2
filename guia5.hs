@@ -81,6 +81,12 @@ maximo (x:[]) = x
 maximo (x:xs) | x > head xs = maximo (x:tail xs)
               | otherwise = maximo xs
 
+--Otra forma
+maximo_ :: [Int] -> Int
+maximo [x] = x
+maximo (x:y:xs) | x > y = maximo (x:xs)
+                | otherwise = maximo (y:xs)
+
 sumarN :: Int -> [Int] -> [Int]
 sumarN _ [] = []
 sumarN n (x:xs) = (n+x):sumarN n xs
