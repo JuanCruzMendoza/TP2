@@ -53,6 +53,11 @@ eliminarRepetidos [] = []
 eliminarRepetidos (x:xs) | pertenece x xs = [x] ++ eliminarRepetidos (quitarTodos x xs) 
                          | otherwise = [x] ++ eliminarRepetidos xs 
 
+eliminarRepetidos :: (Eq t) => [t] -> [t]
+eliminarRepetidos [] = []
+eliminarRepetidos (x:xs) | pertenece x xs = eliminarRepetidos xs
+                         | otherwise = x: eliminarRepetidos xs
+
 mismosElementos :: (Eq t) => [t] -> [t] -> Bool
 mismosElementos [] [] = True
 mismosElementos (x:xs) l | pertenece x l = mismosElementos (quitarTodos x xs) (quitarTodos x l)
