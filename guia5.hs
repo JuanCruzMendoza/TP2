@@ -53,6 +53,7 @@ eliminarRepetidos [] = []
 eliminarRepetidos (x:xs) | pertenece x xs = [x] ++ eliminarRepetidos (quitarTodos x xs) 
                          | otherwise = [x] ++ eliminarRepetidos xs 
 
+# Otra forma
 eliminarRepetidos :: (Eq t) => [t] -> [t]
 eliminarRepetidos [] = []
 eliminarRepetidos (x:xs) | pertenece x xs = eliminarRepetidos xs
@@ -62,6 +63,15 @@ mismosElementos :: (Eq t) => [t] -> [t] -> Bool
 mismosElementos [] [] = True
 mismosElementos (x:xs) l | pertenece x l = mismosElementos (quitarTodos x xs) (quitarTodos x l)
                          | otherwise = False
+
+# Otra forma
+mismosElementos :: (Eq t) => [t] -> [t] -> Bool
+mismosElementos [] _ = True
+mismosElementos (x:xs) l | pertenece x l = mismosElementos xs l
+                              | otherwise = False
+
+mismosElementos_ :: (Eq t) => [t] -> [t] -> Bool
+mismosElementos_ s l = mismosElementos s l && mismosElementos l s
 
 valorPosicion :: (Num t, Eq t) => t -> [a] -> a
 valorPosicion i (x:xs) | i == 0 = x 
