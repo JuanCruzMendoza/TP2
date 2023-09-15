@@ -82,6 +82,10 @@ capicua seq | longitud seq == 1 || longitud seq == 0 = True
                | head seq == ultimo (tail seq) = capicua (principio (tail seq))
                | otherwise = False
 
+capicua2 :: (Eq t) => [t] -> Bool
+capicua2 [] = True
+capicua2 xs = xs == reverso xs
+
 -- Ejercicio 3
 sumatoria :: [Int] -> Int
 sumatoria [] = 0
