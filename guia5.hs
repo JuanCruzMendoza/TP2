@@ -185,10 +185,10 @@ palabraMasLarga2_ xs = palabraMasLarga2 (palabras_ xs)
 
 aplanar :: [[Char]] -> [Char]
 aplanar [x] = x
-aplanar (x:xs) = x ++ [' '] ++ aplanar xs
+aplanar (x:xs) = x ++ aplanar xs
 
 aplanarConBlancos :: [[Char]] -> [Char]
-aplanarConBlancos [] = []
+aplanarConBlancos [x] = x
 aplanarConBlancos (x:xs) = x ++ [' '] ++ aplanarConBlancos xs
 
 agregarNBlancos :: Int -> [Char]
