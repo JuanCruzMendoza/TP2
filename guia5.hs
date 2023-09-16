@@ -211,7 +211,7 @@ sumaAcumulada xs = sumaAcumulada_aux xs 0
 
 primos_aux :: Int -> Int -> [Int]
 primos_aux 1 _ = []
-primos_aux n i | mod n i == 0 = [i] ++ primos_aux (div n i) 2
+primos_aux n i | mod n i == 0 = [i] ++ primos_aux (div n i) i
            | otherwise = primos_aux n (i+1)
 
 primos :: Int -> [Int]
