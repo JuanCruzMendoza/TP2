@@ -184,7 +184,7 @@ palabraMasLarga2_ :: [Char] -> [Char]
 palabraMasLarga2_ xs = palabraMasLarga2 (palabras_ xs)
 
 aplanar :: [[Char]] -> [Char]
-aplanar [] = []
+aplanar [x] = x
 aplanar (x:xs) = x ++ [' '] ++ aplanar xs
 
 aplanarConBlancos :: [[Char]] -> [Char]
