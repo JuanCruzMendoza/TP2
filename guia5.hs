@@ -174,6 +174,15 @@ palabraMasLarga_aux (x:xs) l | longitud x > longitud l = palabraMasLarga_aux xs 
 palabraMasLarga :: [Char] -> [Char]
 palabraMasLarga xs = palabraMasLarga_aux (palabras xs) []
 
+-- Otra forma
+palabraMasLarga2 :: [[Char]] -> [Char]
+palabraMasLarga2 [x] = x
+palabraMasLarga2 (x:y:xs) | longitud x > longitud y = palabraMasLarga2 (x:xs)
+                         | otherwise = palabraMasLarga2 (y:xs)
+
+palabraMasLarga2_ :: [Char] -> [Char]
+palabraMasLarga2_ xs = palabraMasLarga2 (palabras_ xs)
+
 aplanar :: [[Char]] -> [Char]
 aplanar [] = []
 aplanar (x:xs) = x ++ [' '] ++ aplanar xs
