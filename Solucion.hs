@@ -55,3 +55,35 @@ personaConMasAmigos relaciones = personaConMasAmigos_aux (personas relaciones) r
 relacionesValidas2 :: [(String,String)] -> Bool
 relacionesValidas2 [] = True
 relacionesValidas2 (x:xs) = (fst x /= snd x) && not (elem x xs) && not (elem (snd x, fst x) xs) && relacionesValidas2 xs
+
+-- Resolucion profe ej2
+personasConRepetidos :: [(String, String)] -> [String]
+personasConRepetidos [] = []
+personasConRepetidos ( (p1,p2):ps ) = p1:p2:personasConRepetidos ps
+
+personas2 :: [(String, String)] -> [String]
+personas2 ps = eliminarRepetidos ( personasConRepetidos ps)
+
+eliminarRepetidos :: [String] -> [String]
+eliminarRepetidos [] = []
+eliminarRepetidos (x:xs) | elem x xs = eliminarRepetidos xs
+                         | otherwise = x:eliminarRepetidos xs
+
+-- Resolucion profe ej3
+amigosDe2 :: [(String, String)] -> [String]
+amigosDe2 _ [] = []
+amigosDe2 p ( (p1,p2):ps ) | p == p1 = p2: pasoRec 
+                           | p == p2 = p1:pasoRec
+                           | otherwise = pasoRec
+                           where pasoRec = amigosDe2 p ps
+
+-- Resolucion profe ej4
+cantVeces :: (Eq t) => [t] -> [(t,Int)]
+cantVeces [] = []
+cantVeces (x:xs) = (x, cantDeApariciones x (x:xs)) : cantVeces (quitar x xs)
+
+maximo :: [(t,Int)] -> t
+-- requiere xs no vacia
+maximo [(t1,n1)] = t1
+maximo ( (t1, n1): (t2,n2) :xs) | n1 >= n2 = maximo ( (t1,n1):xs )
+                                | otherwise = maximo ( (t2,n2):xs )
