@@ -87,3 +87,7 @@ maximo :: [(t,Int)] -> t
 maximo [(t1,n1)] = t1
 maximo ( (t1, n1): (t2,n2) :xs) | n1 >= n2 = maximo ( (t1,n1):xs )
                                 | otherwise = maximo ( (t2,n2):xs )
+
+elemMasAparece :: (Eq t) => [t] -> t
+-- requiere xs no vacia
+elemMasAparece xs = maximo (cantVeces xs)
