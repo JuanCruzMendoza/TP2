@@ -53,7 +53,7 @@ eliminarRepetidos [] = []
 eliminarRepetidos (x:xs) | pertenece x xs = [x] ++ eliminarRepetidos (quitarTodos x xs) 
                          | otherwise = [x] ++ eliminarRepetidos xs 
 
-# Otra forma
+-- Otra forma
 eliminarRepetidos :: (Eq t) => [t] -> [t]
 eliminarRepetidos [] = []
 eliminarRepetidos (x:xs) | pertenece x xs = eliminarRepetidos xs

@@ -126,7 +126,7 @@ f n | n<=7 = n*n
     | otherwise = 2*n-1
 
 distanciaManhattan:: (Float, Float, Float) -> (Float, Float, Float) -> Float
-distanciaManhattan (x,y,z) (h,i,j) = abs (x-h+y-i+z-j)
+distanciaManhattan (x,y,z) (h,i,j) = abs (x-h) + abs (y-i) + abs (z-j)
 
 sumaUltimosDosDigitos :: Int -> Int
 sumaUltimosDosDigitos n = digitosDecenas n + digitosUnidades n
