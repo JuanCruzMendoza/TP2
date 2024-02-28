@@ -29,7 +29,7 @@ diccionario_letras = {0:"A", 1:"B", 2:"C", 3:"D", 4:"E", 5:"F", 6:"G", 7:"H", 8:
 # Nos fijamos si los datos estan balanceados
 # Contamos la cantidad de datos por cada etiqueta
 cant_label = data["label"].value_counts().reset_index().sort_values("label")
-plt.bar(data=cant_label, x="label", height="count")
+plt.bar(cant_label['index'],cant_label['label'])
 plt.xlabel("Etiqueta")
 plt.ylabel("Cantidad")
 plt.title("Cantidad de datos por cada etiqueta")
@@ -38,6 +38,14 @@ plt.title("Cantidad de datos por cada etiqueta")
 # Construimos matriz de correlacion y tomamos aquellos pixeles que mas se relacionan con label
 correlation_matrix = data.corr()["label"]
 correlated_pixels = correlation_matrix[correlation_matrix > 0].sort_values(ascending=False)[1:]
+
+#%%
+# Graficamos las imagenes sacando los bordes
+imagenes = data.drop(columns="label")
+imagen_1 = imagenes.sample(frac=1).values[1].reshape(28,28)[6:22, 6:22]
+plt.imshow(imagen_1, cmap="gray")
+plt.tick_params(left = True, labelleft = True, labelbottom = False, bottom = False)  
+
 
 #%%
 # Diferencias entre las imagenes de una misma etiqueta (por ejemplo, C)
