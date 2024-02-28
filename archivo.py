@@ -15,6 +15,7 @@ data = pd.read_csv("sign_mnist_train.csv")
 
 
 #%%
+### Analisis exploratorio ###
 
 # Etiquetas (vemos que no existe la J=9 y Z=25)
 labels = data["label"].unique()
