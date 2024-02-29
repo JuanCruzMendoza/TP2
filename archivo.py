@@ -97,7 +97,7 @@ porcentaje_L=cant_L/total_muestras_A_L*100
 print(porcentaje_L)
 
 # Declaramos las variables
-n=5
+n=3
 #X = data_A_L.drop('label', axis=1).sample(n, axis=1) #solo tomo n atributos de X
 X = data_A_L.drop("label",axis=1)[["pixel348","pixel320","pixel376", "pixel292", "pixel405"]]
 y = data_A_L['label']
@@ -117,3 +117,34 @@ neigh.fit(X_train, y_train)
 
 accuracy = neigh.score(X_test, y_test)
 print("Accuracy (test)", accuracy)
+
+# Ahora vemos como varia la prediccion segun cuantos argumentos usemos
+valores_n=range(1,20)
+
+resultados_train=np.zeros(len(valores_n))
+resultados_test=np.zeros(len(valores_n))
+
+for n in valores_n:
+    X = data_A_L.drop('label', axis=1).sample(n, axis=1)
+    y = data_A_L['label']
+    #Separamos en casos de train(70%) y test(30%)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.3)
+    # Declaramos el tipo modelo
+    k=5
+    neigh=KNeighborsClassifier(n_neighbors=k)
+    # Entrenamos el modelo
+    neigh.fit(X_train,y_train)
+    # Evaluamos el modelo con datos de train y luego de test
+    resultados_train[n-1] = neigh.score(X_train, y_train)
+    resultados_test[n-1]  = neigh.score(X_test , y_test )
+
+# Graficamos R2 en funcion de n (para train y test)
+
+plt.plot(valores_n, resultados_train, label = 'Train')
+plt.plot(valores_n, resultados_test, label = 'Test')
+plt.legend()
+plt.title('Performance del modelo de KNN')
+plt.xlabel('Cantidad de atributos')
+plt.ylabel('R^2')
+plt.xticks(valores_n)
+plt.ylim(0.80,1.00)
