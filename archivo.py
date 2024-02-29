@@ -98,12 +98,12 @@ print(porcentaje_L)
 
 # Declaramos las variables
 n=3
-#X = data_A_L.drop('label', axis=1).sample(n, axis=1) #solo tomo n atributos de X
-X = data_A_L.drop("label",axis=1)[["pixel348","pixel320","pixel376", "pixel292", "pixel405"]]
+X = data_A_L.drop('label', axis=1).sample(n, axis=1) #solo tomo n atributos de X
+#X = data_A_L.drop("label",axis=1)[["pixel348","pixel320","pixel376", "pixel292", "pixel405"]]
 y = data_A_L['label']
 
 
-#Separamos en casos de train(70%) y test(20%)
+#Separamos en casos de train(80%) y test(20%)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state=159)
 
 # Declaramos el tipo de modelo
@@ -127,8 +127,8 @@ resultados_test=np.zeros(len(valores_n))
 for n in valores_n:
     X = data_A_L.drop('label', axis=1).sample(n, axis=1)
     y = data_A_L['label']
-    #Separamos en casos de train(70%) y test(30%)
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.3)
+    #Separamos en casos de train(80%) y test(20%)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2)
     # Declaramos el tipo modelo
     k=5
     neigh=KNeighborsClassifier(n_neighbors=k)
