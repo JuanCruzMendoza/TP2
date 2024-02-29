@@ -85,14 +85,15 @@ print(porcentaje_A)
 porcentaje_L=cant_L/total_muestras_A_L*100
 print(porcentaje_L)
 
-#declaramos las variables
+# Declaramos las variables
 n=5
-X = data_A_L.drop('label', axis=1).sample(n, axis=1) #solo tomo n atributos de X
+#X = data_A_L.drop('label', axis=1).sample(n, axis=1) #solo tomo n atributos de X
+X = data_A_L.drop("label",axis=1)[["pixel348","pixel320","pixel376", "pixel292", "pixel405"]]
 y = data_A_L['label']
 
 
-#Separamos en casos de train(70%) y test(30%)
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.3, random_state=159)
+#Separamos en casos de train(70%) y test(20%)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state=159)
 
 # Declaramos el tipo de modelo
 k=5
@@ -103,5 +104,5 @@ neigh.fit(X_train, y_train)
 
 # Evaluamos los resultados
 
-r2 = neigh.score(X_test, y_test)
-print("R^2 (test)", r2)
+accuracy = neigh.score(X_test, y_test)
+print("Accuracy (test)", accuracy)
