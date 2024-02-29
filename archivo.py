@@ -15,7 +15,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 
 data = pd.read_csv("sign_mnist_train.csv")
-
+imagenes = data.drop(columns="label")
 
 #%%
 ### Analisis exploratorio ###
@@ -37,14 +37,25 @@ plt.title("Cantidad de datos por cada etiqueta")
 #%%
 # Construimos matriz de correlacion y tomamos aquellos pixeles que mas se relacionan con label
 correlation_matrix = data.corr()["label"]
-correlated_pixels = correlation_matrix[correlation_matrix > 0].sort_values(ascending=False)[1:]
+correlated_pixels = correlation_matrix.sort_values(ascending=False)[1:]
 
 #%%
-# Graficamos las imagenes sacando los bordes
-imagenes = data.drop(columns="label")
-imagen_1 = imagenes.sample(frac=1).values[1].reshape(28,28)[6:22, 6:22]
+# Graficamos las imagenes sacando los bordes (tomando una imagen aleatoria por vez)
+imagen_1 = imagenes.sample(frac=1).values[0].reshape(28,28)[6:22, 6:22]
 plt.imshow(imagen_1, cmap="gray")
-plt.tick_params(left = True, labelleft = True, labelbottom = False, bottom = False)  
+plt.tick_params(left = False, labelleft = False, labelbottom = False, bottom = False)  
+
+#%%
+# Diferencias entre E y L, o E y M
+data_E = data[data["label"]==4].sample(frac=1).values[0][1:]
+data_L = data[data["label"]==11].sample(frac=1).values[0][1:]
+data_M = data[data["label"]==12].sample(frac=1).values[0][1:]
+
+fig, axes = plt.subplots(2,2)
+axes[0][0].imshow(data_E.reshape(28,28), cmap="gray")
+axes[1][0].imshow(data_E.reshape(28,28), cmap="gray")
+axes[0][1].imshow(data_L.reshape(28,28), cmap="gray")
+axes[1][1].imshow(data_M.reshape(28,28), cmap="gray")
 
 
 #%%
