@@ -13,9 +13,10 @@ import numpy as np
 from inline_sql import sql, sql_val
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
+import random
 
 data = pd.read_csv("sign_mnist_train.csv")
-imagenes = data.drop(columns="label")
+imagenes = data.drop(columns="label").values.reshape(-1,28,28)
 
 #%%
 ### Analisis exploratorio ###
@@ -34,16 +35,39 @@ plt.xlabel("Etiqueta")
 plt.ylabel("Cantidad")
 plt.title("Cantidad de datos por cada etiqueta")
 
-#%%
-# Construimos matriz de correlacion y tomamos aquellos pixeles que mas se relacionan con label
-correlation_matrix = data.corr()["label"]
-correlated_pixels = correlation_matrix.sort_values(ascending=False)[1:]
 
 #%%
 # Graficamos las imagenes sacando los bordes (tomando una imagen aleatoria por vez)
-imagen_1 = imagenes.sample(frac=1).values[0].reshape(28,28)[6:22, 6:22]
-plt.imshow(imagen_1, cmap="gray")
-plt.tick_params(left = False, labelleft = False, labelbottom = False, bottom = False)  
+imagen_cortada = random.choice(imagenes)[6:22, 6:22]
+plt.imshow(imagen_cortada, cmap="gray")
+plt.title("Imagen recortada (16x16)")
+plt.tick_params(left = False, labelleft = False, labelbottom = False, bottom = False)
+
+#%%
+# Aplicamos MaxPooling a las imagenes y todavia son identificables a simple vista
+def max_pooling(image, pool_size=(2, 2)):
+    height, width = image.shape
+    pool_height, pool_width = pool_size
+
+    new_height = height // pool_height
+    new_width = width // pool_width
+
+    pooled_image = np.zeros((new_height, new_width))
+
+    for i in range(new_height):
+        for j in range(new_width):
+            region = image[i * pool_height:(i + 1) * pool_height, j * pool_width:(j + 1) * pool_width]
+            pooled_image[i, j] = np.max(region)
+
+    return pooled_image
+
+nueva_imagen = max_pooling(random.choice(imagenes))
+plt.imshow(nueva_imagen, cmap="gray")
+plt.title("Imagenes con MaxPooling (14x14)")
+plt.tick_params(left = False, labelleft = False, labelbottom = False, bottom = False)
+
+#%%
+
 
 #%%
 # Diferencias entre E y L, o E y M
@@ -53,10 +77,22 @@ data_M = data[data["label"]==12].sample(frac=1).values[0][1:]
 
 fig, axes = plt.subplots(2,2)
 axes[0][0].imshow(data_E.reshape(28,28), cmap="gray")
-axes[1][0].imshow(data_E.reshape(28,28), cmap="gray")
-axes[0][1].imshow(data_L.reshape(28,28), cmap="gray")
-axes[1][1].imshow(data_M.reshape(28,28), cmap="gray")
+axes[0][0].set_xlabel("Letra E")
 
+axes[1][0].imshow(data_E.reshape(28,28), cmap="gray")
+axes[1][0].set_xlabel("Letra E")
+
+axes[0][1].imshow(data_L.reshape(28,28), cmap="gray")
+axes[0][1].set_xlabel("Letra L")
+
+axes[1][1].imshow(data_M.reshape(28,28), cmap="gray")
+axes[1][1].set_xlabel("Letra M")
+
+plt.subplots_adjust(hspace=0.2, wspace=-0.5)
+for row in axes:
+    for ax in row:
+        ax.set_xticks([])
+        ax.set_yticks([])
 
 #%%
 # Diferencias entre las imagenes de una misma etiqueta (por ejemplo, C)
@@ -70,6 +106,8 @@ for fila in range(filas):
         axes[fila][columna].imshow(data_C.values[fila+columna].reshape(28,28), cmap="gray")
         axes[fila][columna].tick_params(left = False, right = False , labelleft = False , 
                 labelbottom = False, bottom = False)  
+    
+plt.subplots_adjust(hspace=0.2, wspace=-0.7)
 
 #%%
 ### PUNTO 2 ###
