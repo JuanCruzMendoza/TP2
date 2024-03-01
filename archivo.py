@@ -191,7 +191,6 @@ print(porcentaje_L)
 
 #%%
 # Declaramos las variables
-n=3
 X = data_A_L.drop('label', axis=1)
 y = data_A_L['label']
 
@@ -253,9 +252,28 @@ print("Accuracy (test)", accuracy)
 imagen_contrastada = apilar_imagenes(11)-apilar_imagenes(0)
 plt.imshow(imagen_contrastada, cmap="gray")
 
+# Tomamos aquellos pixeles que mayor contraste tienen 
+threshold = 85
+pixels_mayores = np.where((imagen_contrastada < -74) | (imagen_contrastada > threshold))
+coordenadas = list(zip(pixels_mayores[0], pixels_mayores[1]))
+
+pixels_nombres = []
+for i,j in coordenadas:
+    pixels_nombres.append(f"pixel{i*28+j}")
+    plt.scatter(j,i, marker="o", color="red")
+    
+# Probamos el modelo utilizando los pixeles elegidos
+X = data_A_L.drop('label', axis=1)[pixels_nombres]
+y = data_A_L['label']
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state=159)
+k=3
+knn3= KNeighborsClassifier(n_neighbors = k)
+knn3.fit(X_train, y_train)
+
+accuracy = knn3.score(X_test, y_test)
+print("Accuracy (test)", accuracy)
 
 #%%
-
 # Ahora vemos como varia la prediccion segun cuantos argumentos usemos
 valores_n=range(1,20)
 
