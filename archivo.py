@@ -45,7 +45,8 @@ plt.tick_params(left = False, labelleft = False, labelbottom = False, bottom = F
 
 #%%
 # Aplicamos MaxPooling a las imagenes y todavia son identificables a simple vista
-def max_pooling(image, pool_size=(2, 2)):
+def max_pooling(image):
+    pool_size=(2, 2)
     height, width = image.shape
     pool_height, pool_width = pool_size
 
@@ -67,7 +68,27 @@ plt.title("Imagenes con MaxPooling (14x14)")
 plt.tick_params(left = False, labelleft = False, labelbottom = False, bottom = False)
 
 #%%
+# Apilamos las imagenes de una letra y promediamos
+# Podemos ver los pixeles mas importantes para caracterizar esa letra
+fig, axes = plt.subplots(1,2)
 
+def apilar_imagenes(letra):
+    data_letra = data[data["label"]==letra].drop(columns=["label"]).values
+    data_letra_prom = (data_letra.sum(axis=0) / len(data_letra)).reshape(28,28)
+    return data_letra_prom
+
+def elegir_imagen(letra):
+    return data[data["label"]==2].sample(1, axis=0).drop(columns="label").values.reshape(28,28)
+
+axes[0].imshow(apilar_imagenes(2), cmap="gray")
+axes[0].set_title("Imagenes apiladas de C")
+
+axes[1].imshow(elegir_imagen(2),cmap="gray")
+axes[1].set_title("Imagen de muestra de C")
+
+for ax in axes:
+    ax.set_xticks([])
+    ax.set_yticks([])
 
 #%%
 # Diferencias entre E y L, o E y M
@@ -96,14 +117,13 @@ for row in axes:
 
 #%%
 # Diferencias entre las imagenes de una misma etiqueta (por ejemplo, C)
-data_C = data[data["label"]==2].sample(frac=1).drop(columns=["label"])
 filas = 5
 columnas = 5
 fig, axes = plt.subplots(filas,columnas)
 
 for fila in range(filas):
     for columna in range(columnas):
-        axes[fila][columna].imshow(data_C.values[fila+columna].reshape(28,28), cmap="gray")
+        axes[fila][columna].imshow(elegir_imagen(2), cmap="gray")
         axes[fila][columna].tick_params(left = False, right = False , labelleft = False , 
                 labelbottom = False, bottom = False)  
     
@@ -156,6 +176,8 @@ neigh.fit(X_train, y_train)
 accuracy = neigh.score(X_test, y_test)
 print("Accuracy (test)", accuracy)
 
+#%%
+
 # Ahora vemos como varia la prediccion segun cuantos argumentos usemos
 valores_n=range(1,20)
 
@@ -164,6 +186,43 @@ resultados_test=np.zeros(len(valores_n))
 
 for n in valores_n:
     X = data_A_L.drop('label', axis=1).sample(n, axis=1)
+    y = data_A_L['label']
+    #Separamos en casos de train(80%) y test(20%)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2)
+    # Declaramos el tipo modelo
+    k=5
+    neigh=KNeighborsClassifier(n_neighbors=k)
+    # Entrenamos el modelo
+    neigh.fit(X_train,y_train)
+    # Evaluamos el modelo con datos de train y luego de test
+    resultados_train[n-1] = neigh.score(X_train, y_train)
+    resultados_test[n-1]  = neigh.score(X_test , y_test )
+
+# Graficamos R2 en funcion de n (para train y test)
+
+plt.plot(valores_n, resultados_train, label = 'Train')
+plt.plot(valores_n, resultados_test, label = 'Test')
+plt.legend()
+plt.title('Performance del modelo de KNN')
+plt.xlabel('Cantidad de atributos')
+plt.ylabel('R^2')
+plt.xticks(valores_n)
+plt.ylim(0.80,1.00)
+
+#%%
+### Pruebas
+valores_n=range(1,20)
+
+resultados_train=np.zeros(len(valores_n))
+resultados_test=np.zeros(len(valores_n))
+max_pooling_vect = np.vectorize(max_pooling)
+data_nueva = data_A_L.drop("label",axis=1).values.reshape(-1,28,28)
+data_max = []
+for i in range(len(data_nueva)):
+    data_max.append(max_pooling(data_nueva[i]).reshape(196))
+
+for n in valores_n:
+    X = pd.DataFrame(data_max).sample(n, axis=1)
     y = data_A_L['label']
     #Separamos en casos de train(80%) y test(20%)
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2)
