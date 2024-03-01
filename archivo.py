@@ -13,6 +13,7 @@ import numpy as np
 from inline_sql import sql, sql_val
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.decomposition import PCA
 import random
 
 data = pd.read_csv("sign_mnist_train.csv")
@@ -25,7 +26,7 @@ imagenes = data.drop(columns="label").values.reshape(-1,28,28)
 labels = data["label"].unique()
 labels.sort()
 
-diccionario_letras = {0:"A", 1:"B", 2:"C", 3:"D", 4:"E", 5:"F", 6:"G", 7:"H", 8:"I", 9:"J", 10:"K", 11:"L", 12:"M", 13:"N", 14:"O", 15:"P", 16:"Q", 17:"R", 18:"S", 19:"T", 20:"U", 21:"V", 22:"W", 23:"X", 24:"Y", 25:"Z"}
+diccionario_letras = {0:"A", 1:"B", 2:"C", 3:"D", 4:"E", 5:"F", 6:"G", 7:"H", 8:"I", 10:"K", 11:"L", 12:"M", 13:"N", 14:"O", 15:"P", 16:"Q", 17:"R", 18:"S", 19:"T", 20:"U", 21:"V", 22:"W", 23:"X", 24:"Y"}
 
 # Nos fijamos si los datos estan balanceados
 # Contamos la cantidad de datos por cada etiqueta
@@ -35,18 +36,35 @@ plt.xlabel("Etiqueta")
 plt.ylabel("Cantidad")
 plt.title("Cantidad de datos por cada etiqueta")
 
+#%%
+# Funciones para graficar
+def elegir_imagen(letra=random.choice(list(diccionario_letras.keys()))):
+    return data[data["label"]==letra].sample(1, axis=0).drop("label",axis=1).values.reshape(28,28)
 
+def total_imagenes(letra):
+    return data[data["label"]==letra].drop("label",axis=1).values.reshape(-1,28,28)
+
+def eliminar_ticks(axes):
+    for row in axes:
+        for ax in row:
+            ax.set_xticks([])
+            ax.set_yticks([])
+            
+def eliminar_ticks_1D(axes):
+    for ax in axes:
+        ax.set_xticks([])
+        ax.set_yticks([])
+        
 #%%
 # Graficamos las imagenes sacando los bordes (tomando una imagen aleatoria por vez)
-imagen_cortada = random.choice(imagenes)[6:22, 6:22]
+imagen_cortada = elegir_imagen()[6:22, 6:22]
 plt.imshow(imagen_cortada, cmap="gray")
 plt.title("Imagen recortada (16x16)")
 plt.tick_params(left = False, labelleft = False, labelbottom = False, bottom = False)
 
 #%%
 # Aplicamos MaxPooling a las imagenes y todavia son identificables a simple vista
-def max_pooling(image):
-    pool_size=(2, 2)
+def max_pooling(image, pool_size=(2, 2)):
     height, width = image.shape
     pool_height, pool_width = pool_size
 
@@ -62,11 +80,15 @@ def max_pooling(image):
 
     return pooled_image
 
-nueva_imagen = max_pooling(random.choice(imagenes))
-plt.imshow(nueva_imagen, cmap="gray")
-plt.title("Imagenes con MaxPooling (14x14)")
-plt.tick_params(left = False, labelleft = False, labelbottom = False, bottom = False)
+fig, axes = plt.subplots(1,2)
+nueva_imagen = elegir_imagen(2)
+axes[0].imshow(max_pooling(nueva_imagen), cmap="gray")
+axes[0].set_title("Imagen con MaxPooling (14x14)")
 
+axes[1].imshow(nueva_imagen, cmap="gray")
+axes[1].set_title("Imagen sin MaxPooling")
+
+eliminar_ticks_1D(axes)
 #%%
 # Apilamos las imagenes de una letra y promediamos
 # Podemos ver los pixeles mas importantes para caracterizar esa letra
@@ -77,43 +99,48 @@ def apilar_imagenes(letra):
     data_letra_prom = (data_letra.sum(axis=0) / len(data_letra)).reshape(28,28)
     return data_letra_prom
 
-def elegir_imagen(letra):
-    return data[data["label"]==2].sample(1, axis=0).drop(columns="label").values.reshape(28,28)
-
 axes[0].imshow(apilar_imagenes(2), cmap="gray")
 axes[0].set_title("Imagenes apiladas de C")
 
 axes[1].imshow(elegir_imagen(2),cmap="gray")
 axes[1].set_title("Imagen de muestra de C")
 
-for ax in axes:
-    ax.set_xticks([])
-    ax.set_yticks([])
+eliminar_ticks_1D(axes)
 
 #%%
-# Diferencias entre E y L, o E y M
-data_E = data[data["label"]==4].sample(frac=1).values[0][1:]
-data_L = data[data["label"]==11].sample(frac=1).values[0][1:]
-data_M = data[data["label"]==12].sample(frac=1).values[0][1:]
+# Aplicamos PCA para reduccion de dimensionalidad
+pca = PCA(n_components = 0.95)
+imagenes_pca = pca.fit_transform(imagenes.reshape(-1,784))
+print(pca.n_components_)
 
+reversed_imagen = pca.inverse_transform(imagenes_pca)
+
+fig, axes = plt.subplots(1,2)
+axes[0].imshow(imagenes[0],cmap="gray")
+axes[0].set_title("Imagen original")
+
+axes[1].imshow(reversed_imagen[0].reshape(28,28), cmap="gray")
+axes[1].set_title("Imagen con PCA")
+
+eliminar_ticks_1D(axes)
+#%%
+# Diferencias entre E y L, o E y M
 fig, axes = plt.subplots(2,2)
-axes[0][0].imshow(data_E.reshape(28,28), cmap="gray")
+axes[0][0].imshow(elegir_imagen(4), cmap="gray")
 axes[0][0].set_xlabel("Letra E")
 
-axes[1][0].imshow(data_E.reshape(28,28), cmap="gray")
+axes[1][0].imshow(elegir_imagen(4), cmap="gray")
 axes[1][0].set_xlabel("Letra E")
 
-axes[0][1].imshow(data_L.reshape(28,28), cmap="gray")
+axes[0][1].imshow(elegir_imagen(11), cmap="gray")
 axes[0][1].set_xlabel("Letra L")
 
-axes[1][1].imshow(data_M.reshape(28,28), cmap="gray")
+axes[1][1].imshow(elegir_imagen(12), cmap="gray")
 axes[1][1].set_xlabel("Letra M")
 
 plt.subplots_adjust(hspace=0.2, wspace=-0.5)
-for row in axes:
-    for ax in row:
-        ax.set_xticks([])
-        ax.set_yticks([])
+
+eliminar_ticks(axes)
 
 #%%
 # Diferencias entre las imagenes de una misma etiqueta (por ejemplo, C)
@@ -124,10 +151,10 @@ fig, axes = plt.subplots(filas,columnas)
 for fila in range(filas):
     for columna in range(columnas):
         axes[fila][columna].imshow(elegir_imagen(2), cmap="gray")
-        axes[fila][columna].tick_params(left = False, right = False , labelleft = False , 
-                labelbottom = False, bottom = False)  
     
 plt.subplots_adjust(hspace=0.2, wspace=-0.7)
+
+eliminar_ticks(axes)
 
 #%%
 ### PUNTO 2 ###
