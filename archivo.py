@@ -9,6 +9,7 @@
 # Importamos librerias y archivos
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 import numpy as np
 from inline_sql import sql, sql_val
 from sklearn.model_selection import train_test_split
@@ -89,6 +90,8 @@ axes[1].imshow(nueva_imagen, cmap="gray")
 axes[1].set_title("Imagen sin MaxPooling")
 
 eliminar_ticks_1D(axes)
+
+
 #%%
 # Apilamos las imagenes de una letra y promediamos
 # Podemos ver los pixeles mas importantes para caracterizar esa letra
@@ -107,22 +110,30 @@ axes[1].set_title("Imagen de muestra de C")
 
 eliminar_ticks_1D(axes)
 
+
 #%%
 # Aplicamos PCA para reduccion de dimensionalidad
-pca = PCA(n_components = 0.95)
+# Elegimos que pueda explicar el 90% de la varianza de los datos
+pca = PCA(n_components = 0.9)
 imagenes_pca = pca.fit_transform(imagenes.reshape(-1,784))
+
+# Cantidad de atributos necesarios para explicar el 90% de la varianza
 print(pca.n_components_)
 
+# Podemos recrear cualquier imagen del dataset a partir de estos pocos atributos
 reversed_imagen = pca.inverse_transform(imagenes_pca)
+num_imagen = 0
 
 fig, axes = plt.subplots(1,2)
-axes[0].imshow(imagenes[0],cmap="gray")
+axes[0].imshow(imagenes[num_imagen],cmap="gray")
 axes[0].set_title("Imagen original")
 
-axes[1].imshow(reversed_imagen[0].reshape(28,28), cmap="gray")
+axes[1].imshow(reversed_imagen[num_imagen].reshape(28,28), cmap="gray")
 axes[1].set_title("Imagen con PCA")
 
 eliminar_ticks_1D(axes)
+
+
 #%%
 # Diferencias entre E y L, o E y M
 fig, axes = plt.subplots(2,2)
@@ -142,6 +153,7 @@ plt.subplots_adjust(hspace=0.2, wspace=-0.5)
 
 eliminar_ticks(axes)
 
+
 #%%
 # Diferencias entre las imagenes de una misma etiqueta (por ejemplo, C)
 filas = 5
@@ -156,18 +168,14 @@ plt.subplots_adjust(hspace=0.2, wspace=-0.7)
 
 eliminar_ticks(axes)
 
+
 #%%
 ### PUNTO 2 ###
 
 # Construimos un nuevo dataframe solo con aquellas imagenes que sean una A o una L
-consulta="""
-SELECT *
-FROM data
-WHERE label==0 OR label==11
-"""
-data_A_L=sql^consulta
+data_A_L = data[(data["label"]==0) | (data["label"]==11)]
 
-#◙ Vemos el numero total de muestras 
+# Vemos el numero total de muestras 
 total_muestras_A_L=len(data_A_L)
 print(total_muestras_A_L)
 
@@ -181,27 +189,70 @@ print(porcentaje_A)
 porcentaje_L=cant_L/total_muestras_A_L*100
 print(porcentaje_L)
 
+#%%
 # Declaramos las variables
 n=3
-X = data_A_L.drop('label', axis=1).sample(n, axis=1) #solo tomo n atributos de X
-#X = data_A_L.drop("label",axis=1)[["pixel348","pixel320","pixel376", "pixel292", "pixel405"]]
+X = data_A_L.drop('label', axis=1)
 y = data_A_L['label']
-
 
 #Separamos en casos de train(80%) y test(20%)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state=159)
 
-# Declaramos el tipo de modelo
-k=5
-neigh = KNeighborsClassifier(n_neighbors = k)
+# Declaramos el modelo de KNN
+k=3
+knn1= KNeighborsClassifier(n_neighbors = k)
 
-# Entrenamos el modelo
-neigh.fit(X_train, y_train)
+# Entrenamos el modelo, con todos los atributos de X
+knn1.fit(X_train, y_train)
 
 # Evaluamos los resultados
-
-accuracy = neigh.score(X_test, y_test)
+accuracy = knn1.score(X_test, y_test)
 print("Accuracy (test)", accuracy)
+
+
+#%%
+# Veamos si podemos obtener resultados similares usando menos atributos
+# Empecemos con PCA, viendo primero cuantos componentes usar
+pca = PCA()
+pca.n_components = 100 # Cantidad maxima de componentes
+pca_X_train = pca.fit_transform(X_train)
+
+# Veamos la varianza explicada de los datos en funciona de cuantos componentes tiene el PCA
+varianza_explicada = pca.explained_variance_ / np.sum(pca.explained_variance_);
+varianza_acumulada = np.cumsum(varianza_explicada)
+
+fig, ax = plt.subplots()
+
+ax.plot(varianza_acumulada, linewidth=2)
+ax.yaxis.set_major_formatter(ticker.PercentFormatter(1))
+ax.grid()
+ax.set_xticks(np.arange(0,101,10))
+ax.set_xlabel('Cantidad de componentes')
+ax.set_ylabel('Varianza explicada')
+ax.set_title("Aumento de la varianza segun componentes de PCA")
+
+
+#%%
+# Utilizamos PCA con 2 componentes
+pca = PCA(n_components=2)
+pca_X_train = pca.fit_transform(X_train)
+
+k=3
+knn2 = KNeighborsClassifier(n_neighbors = k)
+knn2.fit(pca_X_train, y_train)
+
+# Transformamos los datos test (sin hacer fit)
+pca_X_test = pca.transform(X_test)
+
+accuracy = knn2.score(pca_X_test, y_test)
+print("Accuracy (test)", accuracy)
+
+
+#%%
+# Probemos otro metodo: apilar las imagenes y ver las diferencias entre si
+imagen_contrastada = apilar_imagenes(11)-apilar_imagenes(0)
+plt.imshow(imagen_contrastada, cmap="gray")
+
 
 #%%
 
@@ -236,39 +287,3 @@ plt.ylabel('R^2')
 plt.xticks(valores_n)
 plt.ylim(0.80,1.00)
 
-#%%
-### Pruebas
-valores_n=range(1,20)
-
-resultados_train=np.zeros(len(valores_n))
-resultados_test=np.zeros(len(valores_n))
-max_pooling_vect = np.vectorize(max_pooling)
-data_nueva = data_A_L.drop("label",axis=1).values.reshape(-1,28,28)
-data_max = []
-for i in range(len(data_nueva)):
-    data_max.append(max_pooling(data_nueva[i]).reshape(196))
-
-for n in valores_n:
-    X = pd.DataFrame(data_max).sample(n, axis=1)
-    y = data_A_L['label']
-    #Separamos en casos de train(80%) y test(20%)
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2)
-    # Declaramos el tipo modelo
-    k=5
-    neigh=KNeighborsClassifier(n_neighbors=k)
-    # Entrenamos el modelo
-    neigh.fit(X_train,y_train)
-    # Evaluamos el modelo con datos de train y luego de test
-    resultados_train[n-1] = neigh.score(X_train, y_train)
-    resultados_test[n-1]  = neigh.score(X_test , y_test )
-
-# Graficamos R2 en funcion de n (para train y test)
-
-plt.plot(valores_n, resultados_train, label = 'Train')
-plt.plot(valores_n, resultados_test, label = 'Test')
-plt.legend()
-plt.title('Performance del modelo de KNN')
-plt.xlabel('Cantidad de atributos')
-plt.ylabel('R^2')
-plt.xticks(valores_n)
-plt.ylim(0.80,1.00)
