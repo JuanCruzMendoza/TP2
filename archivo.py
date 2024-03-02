@@ -346,7 +346,75 @@ knn3.fit(X_train, y_train)
 accuracy = knn3.score(X_test, y_test)
 print("Accuracy (test)", accuracy)
 
+#%%
+### PUNTO 3 ###
 
+# Generamos el dataset que solo contiene vocales
+vocales = data[(data["label"]==0) |
+               (data["label"]==4) |
+               (data["label"]==8) | 
+               (data["label"]==14)|
+               (data["label"]==20)]
+
+# Vemos si estan balanceadas en cantidad 
+cant_A = vocales['label'].value_counts()[0]
+cant_E = vocales['label'].value_counts()[4] #Tiene menos que el resto, usamos stratify k fold
+cant_I = vocales['label'].value_counts()[8]
+cant_O = vocales['label'].value_counts()[14]
+cant_U = vocales['label'].value_counts()[20]
+
+#Declaramos las variables 
+X = vocales.drop('label', axis=1)
+y = vocales['label']
+
+# Dividimos los datos en train(80%) y test(20%)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=49)
+
+# Evaluamos en distintas profundidades
+df_profundidades = pd.DataFrame(columns=['Profundidad', 'Precisión en Train', 'Precisión en Test'])
+
+for depth in range(1, 20):
+    arbol = DecisionTreeClassifier(max_depth=depth)
+    arbol.fit(X_train, y_train)
+    y_pred_train = arbol.predict(X_train)
+    acc_train = accuracy_score(y_train, y_pred_train)
+    y_pred_test = arbol.predict(X_test)
+    acc_test = accuracy_score(y_test, y_pred_test)
+    df_profundidades = df_profundidades.append({'Profundidad': depth, 'Precisión en Train': acc_train, 'Precisión en Test': acc_test},ignore_index=True)
+    
+    
+#Nos quedamos con la que mejores resultados de test tenga
+mejor_profundidad=int((df_profundidades.sort_values(by='Precisión en Test', ascending=False)).iloc[0][0])
+print("Mejor profundidad:" ,mejor_profundidad)
+
+#Armamos el modelo usando esta profundidad
+arbol1=DecisionTreeClassifier(max_depth=mejor_profundidad)
+
+#Entrenamos al modelo
+arbol1.fit(X_train,y_train)
+
+# Usamos validación cruzada con Stratified K-Fold
+skf = StratifiedKFold(n_splits=5)
+cv_scores = cross_val_score(arbol1, X_train, y_train, cv=skf)
+print("Precisión media CV:", cv_scores.mean())
+
+# Predecimos en el conjunto de test
+y_pred_test = arbol1.predict(X_test)
+
+# Calculamos la precisión en el conjunto de test
+acc_test = accuracy_score(y_test, y_pred_test)
+print("Precisión en Test:", acc_test)
+
+# Armamos la matriz de confusión
+conf_matrix = confusion_matrix(y_test, y_pred_test)
+
+# visualizacion la matriz de confusión
+plt.figure(figsize=(8, 6))
+sns.heatmap(conf_matrix, annot=True, fmt="d", cmap="Blues", xticklabels=['A', 'E', 'I', 'O', 'U'], yticklabels=['A', 'E', 'I', 'O', 'U'])
+plt.xlabel('Predicted')
+plt.ylabel('Actual')
+plt.title('Matriz de Confusión')
+plt.show()
 
 
 
