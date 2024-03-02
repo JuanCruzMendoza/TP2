@@ -358,20 +358,21 @@ y = vocales['label']
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=159)
 
 # Evaluamos en distintas profundidades
-df_profundidades = pd.DataFrame(columns=['Profundidad', 'Precisión en Train', 'Precisión en Test'])
+df_profundidades = pd.DataFrame(columns=['Profundidad', 'Precisión en Train'])
 
 for depth in range(1, 20):
+    #Declaramos el modelo
     arbol = DecisionTreeClassifier(max_depth=depth)
+    #Entrenamos el modelo
     arbol.fit(X_train, y_train)
-    y_pred_train = arbol.predict(X_train)
-    acc_train = accuracy_score(y_train, y_pred_train)
-    y_pred_test = arbol.predict(X_test)
-    acc_test = accuracy_score(y_test, y_pred_test)
-    df_profundidades = df_profundidades.append({'Profundidad': depth, 'Precisión en Train': acc_train, 'Precisión en Test': acc_test},ignore_index=True)
+    #Usamos stratify k folding para ver cual es el mejor arbol
+    skf = StratifiedKFold(n_splits=5)
+    cv_scores = cross_val_score(arbol, X_train, y_train, cv=skf)
+    df_profundidades = df_profundidades.append({'Profundidad': depth, 'Precisión en Train': cv_scores.mean()},ignore_index=True)
     
     
 #Nos quedamos con la que mejores resultados de test tenga
-mejor_profundidad=int((df_profundidades.sort_values(by='Precisión en Test', ascending=False)).iloc[0][0])
+mejor_profundidad=int((df_profundidades.sort_values(by='Precisión en Train', ascending=False)).iloc[0][0])
 print("Mejor profundidad:" ,mejor_profundidad)
 
 #Armamos el modelo usando esta profundidad
@@ -379,11 +380,6 @@ arbol1=DecisionTreeClassifier(max_depth=mejor_profundidad)
 
 #Entrenamos al modelo
 arbol1.fit(X_train,y_train)
-
-# Usamos validación cruzada con Stratified K-Fold
-skf = StratifiedKFold(n_splits=5)
-cv_scores = cross_val_score(arbol1, X_train, y_train, cv=skf)
-print("Precisión media CV:", cv_scores.mean())
 
 # Predecimos en el conjunto de test
 y_pred_test = arbol1.predict(X_test)
