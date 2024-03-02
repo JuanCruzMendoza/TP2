@@ -11,12 +11,15 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import numpy as np
-from inline_sql import sql, sql_val
-from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.model_selection import train_test_split, StratifiedKFold
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn import metrics
 from sklearn.decomposition import PCA
 import random
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import cross_val_score
+from sklearn.metrics import confusion_matrix
+import seaborn as sns
 
 data = pd.read_csv("sign_mnist_train.csv")
 imagenes = data.drop(columns="label").values.reshape(-1,28,28)
@@ -247,51 +250,18 @@ plt.grid()
 
 
 #%%
-## Pruebas
-valores_n=range(1,20)
-num_rep = 50
-
-resultados_test  = np.zeros( len(valores_n))
-resultados_train = np.zeros( len(valores_n))
-
-
-for n in valores_n:
-        X = data_A_L.drop('label', axis=1).sample(n, axis=1)
-        y = data_A_L['label']
-        #Separamos en casos de train(80%) y test(20%)
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, shuffle=True, stratify=y)
-        # Declaramos el tipo modelo
-        k=3
-        neigh=KNeighborsClassifier(n_neighbors=k)
-        neigh.fit(X_train, y_train)
-        # Entrenamos el modelo
-        # Evaluamos el modelo con datos de train y luego de test
-        resultados_train[n-1] = np.mean(cross_val_score(neigh, X_train, y_train, cv=10))
-        resultados_test[n-1]  = neigh.score(X_test , y_test )
-
-
-
-# Graficamos R2 en funcion de n (para train y test)
-
-plt.plot(valores_n, resultados_train, label = 'Train')
-plt.plot(valores_n, resultados_test, label = 'Test')
-plt.legend()
-plt.title('Performance del modelo de KNN')
-plt.xlabel('Cantidad de atributos')
-plt.ylabel('Accuracy')
-plt.xticks(valores_n)
-plt.grid()
-
-
-#%%
 # Veamos si podemos obtener resultados similares usando menos atributos
 # Empecemos con PCA
+X = data_A_L.drop('label', axis=1)
+y = data_A_L['label']
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, shuffle=True, stratify=y, random_state=159)
+
 pca = PCA()
 pca.n_components = 100 # Cantidad maxima de componentes
 pca_X_train = pca.fit_transform(X_train)
 
 # Veamos la varianza explicada de los datos en funciona de cuantos componentes tiene el PCA
-varianza_explicada = pca.explained_variance_ / np.sum(pca.explained_variance_);
+varianza_explicada = pca.explained_variance_ / np.sum(pca.explained_variance_)
 varianza_acumulada = np.cumsum(varianza_explicada)
 
 fig, ax = plt.subplots()
@@ -319,9 +289,26 @@ pca_X_test = pca.transform(X_test)
 accuracy = knn2.score(pca_X_test, y_test)
 print("Accuracy (test)", accuracy)
 
+predicciones = np.hstack((pca_X_test, knn2.predict(pca_X_test).reshape(-1,1)))
+
+predicciones_A = predicciones[predicciones[:,2]==0]
+predicciones_L = predicciones[predicciones[:,2]==11]
+
+# Predicciones que no fueron correctas
+predicciones_error = predicciones[predicciones[:,2] != y_test]
+
+plt.scatter(predicciones_A[:,0], predicciones_A[:,1], color="red")
+plt.scatter(predicciones_L[:,0], predicciones_L[:,1], color="skyblue")
+plt.scatter(predicciones_error[:,0], predicciones_error[:,1], color="black")
+
+plt.legend(["A", "L", "Error"])
+plt.title("KNN clasificacion con PCA")
+plt.xlabel("1PC")
+plt.ylabel("2PC")
+
 
 #%%
-# Probemos otro metodo: apilar las imagenes y ver las diferencias entre si
+# Probemos otro metodo: apilar las imagenes y contrastarlas
 imagen_contrastada = apilar_imagenes(11)-apilar_imagenes(0)
 plt.imshow(imagen_contrastada, cmap="gray")
 
@@ -368,7 +355,7 @@ X = vocales.drop('label', axis=1)
 y = vocales['label']
 
 # Dividimos los datos en train(80%) y test(20%)
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=49)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=159)
 
 # Evaluamos en distintas profundidades
 df_profundidades = pd.DataFrame(columns=['Profundidad', 'Precisión en Train', 'Precisión en Test'])
@@ -411,8 +398,8 @@ conf_matrix = confusion_matrix(y_test, y_pred_test)
 # visualizacion la matriz de confusión
 plt.figure(figsize=(8, 6))
 sns.heatmap(conf_matrix, annot=True, fmt="d", cmap="Blues", xticklabels=['A', 'E', 'I', 'O', 'U'], yticklabels=['A', 'E', 'I', 'O', 'U'])
-plt.xlabel('Predicted')
-plt.ylabel('Actual')
+plt.xlabel('Prediccion')
+plt.ylabel('Real')
 plt.title('Matriz de Confusión')
 plt.show()
 
